@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generation</title>
+    <style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #184e68 0%, #57ca85 100%);
+            --gradient-secondary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            --gradient-accent: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+            --gradient-button: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            --gradient-hover: linear-gradient(135deg, #16222a 0%, #3a6073 100%);
+            --shadow-soft: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-strong: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: var(--gradient-primary);
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        header {
+            margin-bottom: 2rem;
+        }
+
+        header img {
+            width: 200px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        h2 {
+            color: #184e68;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .file-label {
+            background: var(--gradient-accent);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .file-label svg {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: var(--gradient-button);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            width: 220px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            background: var(--gradient-hover);
+        }
+
+        .btn:disabled {
+            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #statusMessage {
+            margin-top: 20px;
+            font-weight: 500;
+            min-height: 24px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #556270 100%);
+            color: white;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .divider {
+            margin: 2.5rem 0;
+            height: 2px;
+            background: var(--gradient-secondary);
+            border-radius: 2px;
+            opacity: 0.2;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            color: #2c5364;
+            font-size: 0.95rem;
+            padding: 10px 20px;
+            background: rgba(108, 213, 237, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(33, 147, 176, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glass morphism effect for sections */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container glass-effect">
+        <header>
+            <img src="logo.png" alt="NutriFlow Logo">
+        </header>
+
+        <section class="section glass-effect">
+            <h2>Upload Your Document for Report Generation</h2>
+            <div class="upload-container">
+                <label class="file-label" for="fileInput">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 15V3H13V15H11Z" fill="currentColor"/>
+                        <path d="M8.5 9.5L12 6L15.5 9.5L14 11L12 9L10 11L8.5 9.5Z" fill="currentColor"/>
+                        <path d="M20 18H4V11H6V16H18V11H20V18Z" fill="currentColor"/>
+                    </svg>
+                    Choose File
+                </label>
+                <input type="file" id="fileInput" name="file" accept=".pdf,.docx,.txt">
+                <div id="fileInfo" class="file-info"></div>
+                <button id="gen-btn" class="btn" disabled>Generate Report</button>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="section glass-effect">
+            <h2>Generate Report from Your Data</h2>
+            <button id="generate-btn" class="btn">Generate Report</button>
+        </section>
+
+        <p id="statusMessage"></p>
+    </div>
+
+    <script src="report.js"></script>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileInfo = document.getElementById('fileInfo');
+            const genBtn = document.getElementById('gen-btn');
+            
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                fileInfo.textContent = `Selected file: ${file.name}`;
+                fileInfo.style.display = 'block';
+                genBtn.disabled = false;
+            } else {
+                fileInfo.textContent = '';
+                fileInfo.style.display = 'none';
+                genBtn.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>

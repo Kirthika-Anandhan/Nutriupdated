@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Counter</title>
+    <link rel="stylesheet" href="game.css">
+    <style>
+        .challenge-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .meal-input {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .meal-list {
+            margin: 2rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .meal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: #FF9800;
+            transition: width 0.5s ease-in-out;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .meal-type {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .meal-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #f0f0f0;
+        }
+        .meal-btn.selected {
+            background: #FF9800;
+            color: white;
+        }
+    </style>
+</head>
+<body class="calories-page">
+    <header>
+        <h1>Calorie Counter</h1>
+        <nav>
+            <button onclick="navigateTo('game.html')">Back to Challenges</button>
+        </nav>
+    </header>
+
+    <main class="challenge-container">
+        <div class="progress-bar">
+            <div class="progress" id="calorieProgress"></div>
+        </div>
+        <p class="text-center">
+            <span id="currentCalories">0</span> / <span id="goalCalories">2000</span> calories
+        </p>
+
+        <div class="meal-type">
+            <button class="meal-btn" onclick="selectMealType('breakfast')">Breakfast</button>
+            <button class="meal-btn" onclick="selectMealType('lunch')">Lunch</button>
+            <button class="meal-btn" onclick="selectMealType('dinner')">Dinner</button>
+            <button class="meal-btn" onclick="selectMealType('snack')">Snack</button>
+        </div>
+
+        <div class="meal-input">
+            <input type="text" id="foodName" placeholder="Enter food item">
+            <input type="number" id="calories" placeholder="Calories">
+            <button onclick="addFood()">Add</button>
+        </div>
+
+        <div class="meal-list" id="mealList">
+            <!-- Meal items will be added here -->
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Daily Goal</h3>
+                <p id="goalProgress">0%</p>
+            </div>
+            <div class="stat-card">
+                <h3>Streak</h3>
+                <p id="streak">0 days</p>
+            </div>
+            <div class="stat-card">
+                <h3>Achievements</h3>
+                <p id="achievements">0</p>
+            </div>
+        </div>
+
+        <div class="achievements-list">
+            <h3>Recent Achievements</h3>
+            <ul id="achievementsList">
+                <!-- Achievements will be added here dynamically -->
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        let currentCalories = 0;
+        let streak = 0;
+        let achievementsCount = 0;
+        let selectedMealType = 'breakfast';
+        let meals = [];
+
+        function selectMealType(type) {
+            selectedMealType = type;
+            document.querySelectorAll('.meal-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`.meal-btn:nth-child(${['breakfast', 'lunch', 'dinner', 'snack'].indexOf(type) + 1})`).classList.add('selected');
+        }
+
+        function addFood() {
+            const foodName = document.getElementById('foodName').value;
+            const calories = parseInt(document.getElementById('calories').value);
+
+            if (!foodName || isNaN(calories)) {
+                alert('Please enter both food name and calories');
+                return;
+            }
+
+            const meal = {
+                type: selectedMealType,
+                name: foodName,
+                calories: calories,
+                time: new Date()
+            };
+
+            meals.push(meal);
+            currentCalories += calories;
+            updateDisplay();
+            addMealToList(meal);
+            checkAchievements();
+
+            // Clear inputs
+            document.getElementById('foodName').value = '';
+            document.getElementById('calories').value = '';
+        }
+
+        function addMealToList(meal) {
+            const list = document.getElementById('mealList');
+            const item = document.createElement('div');
+            item.className = 'meal-item';
+            item.innerHTML = `
+                <span>${meal.name} (${meal.type})</span>
+                <span>${meal.calories} cal</span>
+            `;
+            list.insertBefore(item, list.firstChild);
+        }
+
+        function updateDisplay() {
+            document.getElementById('currentCalories').textContent = currentCalories;
+            document.getElementById('goalProgress').textContent = 
+                Math.min(100, Math.round((currentCalories / 2000) * 100)) + '%';
+            document.getElementById('streak').textContent = streak + ' days';
+            document.getElementById('achievements').textContent = achievementsCount;
+
+            // Update progress bar
+            const progress = (currentCalories / 2000) * 100;
+            document.getElementById('calorieProgress').style.width = Math.min(100, progress) + '%';
+        }
+
+        function checkAchievements() {
+            const achievements = [
+                { condition: meals.length >= 3, name: "Food Logger" },
+                { condition: currentCalories <= 2000, name: "On Target" },
+                { condition: meals.filter(m => m.type === 'breakfast').length > 0, name: "Early Bird" },
+                { condition: streak >= 3, name: "Consistent Tracker" }
+            ];
+
+            achievements.forEach(achievement => {
+                if (achievement.condition) {
+                    addAchievement(achievement.name);
+                }
+            });
+        }
+
+        function addAchievement(name) {
+            const list = document.getElementById('achievementsList');
+            const existingAchievements = list.innerText;
+            
+            if (!existingAchievements.includes(name)) {
+                achievementsCount++;
+                const li = document.createElement('li');
+                li.textContent = `🍎 ${name}`;
+                list.insertBefore(li, list.firstChild);
+                updateDisplay();
+            }
+        }
+
+        // Initialize
+        selectMealType('breakfast');
+        updateDisplay();
+    </script>
+</body>
+</html> 

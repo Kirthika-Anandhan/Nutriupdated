@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <link rel="stylesheet" href="game.css">
+    <style>
+        .challenge-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .workout-input {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .workout-list {
+            margin: 2rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .workout-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .workout-type {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .type-btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        .type-btn.selected {
+            background: #9C27B0;
+            color: white;
+            transform: scale(1.05);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .intensity-meter {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .intensity-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+        .intensity-dot.active {
+            background: #9C27B0;
+        }
+    </style>
+</head>
+<body class="workout-page">
+    <header>
+        <h1>Workout Tracker</h1>
+        <nav>
+            <button onclick="navigateTo('game.html')">Back to Challenges</button>
+        </nav>
+    </header>
+
+    <main class="challenge-container">
+        <div class="workout-type">
+            <button class="type-btn" onclick="selectType('cardio')">Cardio</button>
+            <button class="type-btn" onclick="selectType('strength')">Strength</button>
+            <button class="type-btn" onclick="selectType('flexibility')">Flexibility</button>
+        </div>
+
+        <div class="intensity-meter">
+            <p>Intensity:</p>
+            <div class="intensity-dot" onclick="setIntensity(1)"></div>
+            <div class="intensity-dot" onclick="setIntensity(2)"></div>
+            <div class="intensity-dot" onclick="setIntensity(3)"></div>
+            <div class="intensity-dot" onclick="setIntensity(4)"></div>
+            <div class="intensity-dot" onclick="setIntensity(5)"></div>
+        </div>
+
+        <div class="workout-input">
+            <input type="text" id="exerciseName" placeholder="Exercise name">
+            <input type="number" id="duration" placeholder="Minutes">
+            <input type="number" id="sets" placeholder="Sets">
+            <button onclick="addWorkout()">Add</button>
+        </div>
+
+        <div class="workout-list" id="workoutList">
+            <!-- Workout items will be added here -->
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Time</h3>
+                <p id="totalTime">0 mins</p>
+            </div>
+            <div class="stat-card">
+                <h3>Workout Streak</h3>
+                <p id="streak">0 days</p>
+            </div>
+            <div class="stat-card">
+                <h3>Achievements</h3>
+                <p id="achievements">0</p>
+            </div>
+        </div>
+
+        <div class="achievements-list">
+            <h3>Recent Achievements</h3>
+            <ul id="achievementsList">
+                <!-- Achievements will be added here dynamically -->
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        let selectedType = '';
+        let selectedIntensity = 0;
+        let streak = 0;
+        let achievementsCount = 0;
+        let workouts = [];
+        let totalMinutes = 0;
+
+        function selectType(type) {
+            selectedType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`.type-btn:nth-child(${['cardio', 'strength', 'flexibility'].indexOf(type) + 1})`).classList.add('selected');
+        }
+
+        function setIntensity(level) {
+            selectedIntensity = level;
+            document.querySelectorAll('.intensity-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index < level);
+            });
+        }
+
+        function addWorkout() {
+            const name = document.getElementById('exerciseName').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const sets = parseInt(document.getElementById('sets').value) || 1;
+
+            if (!name || !duration || !selectedType || !selectedIntensity) {
+                alert('Please fill in all fields and select type and intensity');
+                return;
+            }
+
+            const workout = {
+                name: name,
+                type: selectedType,
+                duration: duration,
+                sets: sets,
+                intensity: selectedIntensity,
+                time: new Date()
+            };
+
+            workouts.push(workout);
+            totalMinutes += duration * sets;
+            updateDisplay();
+            addWorkoutToList(workout);
+            checkAchievements();
+
+            // Clear inputs
+            document.getElementById('exerciseName').value = '';
+            document.getElementById('duration').value = '';
+            document.getElementById('sets').value = '';
+        }
+
+        function addWorkoutToList(workout) {
+            const list = document.getElementById('workoutList');
+            const item = document.createElement('div');
+            item.className = 'workout-item';
+            item.innerHTML = `
+                <div>
+                    <strong>${workout.name}</strong>
+                    <span>(${workout.type})</span>
+                </div>
+                <div>
+                    ${workout.duration} mins × ${workout.sets} sets
+                    <span style="color: #9C27B0">•</span>
+                    Intensity: ${workout.intensity}/5
+                </div>
+            `;
+            list.insertBefore(item, list.firstChild);
+        }
+
+        function updateDisplay() {
+            document.getElementById('totalTime').textContent = totalMinutes + ' mins';
+            document.getElementById('streak').textContent = streak + ' days';
+            document.getElementById('achievements').textContent = achievementsCount;
+        }
+
+        function checkAchievements() {
+            const achievements = [
+                { condition: workouts.length >= 1, name: "First Workout" },
+                { condition: totalMinutes >= 30, name: "30-Minute Warrior" },
+                { condition: workouts.some(w => w.intensity === 5), name: "High Intensity Hero" },
+                { condition: new Set(workouts.map(w => w.type)).size >= 3, name: "Diverse Athlete" }
+            ];
+
+            achievements.forEach(achievement => {
+                if (achievement.condition) {
+                    addAchievement(achievement.name);
+                }
+            });
+        }
+
+        function addAchievement(name) {
+            const list = document.getElementById('achievementsList');
+            const existingAchievements = list.innerText;
+            
+            if (!existingAchievements.includes(name)) {
+                achievementsCount++;
+                const li = document.createElement('li');
+                li.textContent = `💪 ${name}`;
+                list.insertBefore(li, list.firstChild);
+                updateDisplay();
+            }
+        }
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html> 

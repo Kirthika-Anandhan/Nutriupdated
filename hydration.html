@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydration Tracker</title>
+    <link rel="stylesheet" href="game.css">
+    <style>
+        .challenge-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .water-container {
+            position: relative;
+            width: 200px;
+            height: 250px;
+            margin: 2rem auto;
+            background: #f0f0f0;
+            border: 3px solid #2196F3;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+        }
+        .water-level {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #2196F3;
+            transition: height 0.5s ease-in-out;
+        }
+        .quick-add {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .water-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .water-btn:hover {
+            background: #1976D2;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="hydration-page">
+    <header>
+        <h1>Hydration Tracker</h1>
+        <nav>
+            <button onclick="navigateTo('game.html')">Back to Challenges</button>
+        </nav>
+    </header>
+
+    <main class="challenge-container">
+        <div class="water-container">
+            <div class="water-level" id="waterLevel"></div>
+        </div>
+        <p class="text-center">
+            <span id="currentWater">0</span> / <span id="goalWater">2000</span> ml
+        </p>
+
+        <div class="quick-add">
+            <button class="water-btn" onclick="addWater(250)">+ 250ml</button>
+            <button class="water-btn" onclick="addWater(500)">+ 500ml</button>
+            <button class="water-btn" onclick="addWater(1000)">+ 1000ml</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Daily Streak</h3>
+                <p id="streak">0 days</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Today</h3>
+                <p id="totalWater">0 ml</p>
+            </div>
+            <div class="stat-card">
+                <h3>Achievements</h3>
+                <p id="achievements">0</p>
+            </div>
+        </div>
+
+        <div class="achievements-list">
+            <h3>Recent Achievements</h3>
+            <ul id="achievementsList">
+                <!-- Achievements will be added here dynamically -->
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        let currentWater = 0;
+        let streak = 0;
+        let achievementsCount = 0;
+
+        function addWater(amount) {
+            currentWater += amount;
+            updateDisplay();
+            checkAchievements();
+        }
+
+        function updateDisplay() {
+            document.getElementById('currentWater').textContent = currentWater;
+            document.getElementById('totalWater').textContent = currentWater + ' ml';
+            document.getElementById('streak').textContent = streak + ' days';
+            document.getElementById('achievements').textContent = achievementsCount;
+
+            // Update water level visualization
+            const percentage = (currentWater / 2000) * 100;
+            document.getElementById('waterLevel').style.height = Math.min(100, percentage) + '%';
+        }
+
+        function checkAchievements() {
+            const achievements = [
+                { threshold: 500, name: "First Sip" },
+                { threshold: 1000, name: "Halfway There" },
+                { threshold: 2000, name: "Daily Goal Achieved" },
+                { threshold: 3000, name: "Hydration Master" }
+            ];
+
+            achievements.forEach(achievement => {
+                if (currentWater >= achievement.threshold) {
+                    addAchievement(achievement.name);
+                }
+            });
+        }
+
+        function addAchievement(name) {
+            const list = document.getElementById('achievementsList');
+            const existingAchievements = list.innerText;
+            
+            if (!existingAchievements.includes(name)) {
+                achievementsCount++;
+                const li = document.createElement('li');
+                li.textContent = `💧 ${name}`;
+                list.insertBefore(li, list.firstChild);
+                updateDisplay();
+            }
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html> 

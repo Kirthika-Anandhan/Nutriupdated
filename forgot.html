@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password</title>
+    <script src="signup.js" defer></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fef9f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        /* Logo Styling */
+        .logo {
+            width: 120px;
+            margin-bottom: 10px;
+        }
+
+        /* Title */
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        /* Input Field */
+        input {
+            width: 90%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        
+        .btn {
+            width: 100%;
+            background-color: #c93f5d;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #a32f4a;
+        }
+
+        /* Back to Login */
+        .back {
+            display: block;
+            margin-top: 15px;
+            color: #c93f5d;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="logo.jpg" alt="NutriFlow Logo" width="300" height="125" class="logo">  <!-- Replace with your actual logo file -->
+        <h2>Forgot Password</h2>
+        <p>Enter your email to receive an OTP.</p>
+        <input type="email" placeholder="Enter your email" required>
+        <button class="btn">Send OTP</button>
+        <a href="signin.html" class="back">Back to Login</a>
+    </div>
+</body>
+</html>

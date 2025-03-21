@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tycoon</title>
+    <link rel="stylesheet" href="game.css">
+    <style>
+        .game-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .level-card {
+            position: relative;
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 3px solid transparent;
+        }
+        .level-card.locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .level-card.completed {
+            background: linear-gradient(145deg, #E8F5E9, #C8E6C9);
+        }
+        .level-card:not(.locked):hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #4CAF50;
+        }
+        .level-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .level-status {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .level-card.completed .level-status {
+            color: #4CAF50;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.5s ease;
+        }
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .tutorial-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 600px;
+            text-align: center;
+        }
+        .report-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        .level-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .floating-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .points-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+        .health-bar {
+            width: 200px;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .health-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+        }
+        .power-ups {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .power-up {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .power-up:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .power-up.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .level-stars {
+            position: absolute;
+            top: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        .star {
+            font-size: 1.2rem;
+            color: #FFD700;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+        .star.earned {
+            opacity: 1;
+            animation: starPulse 1s ease;
+        }
+        .level-card.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+        .challenge-content {
+            position: relative;
+            min-height: 300px;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .game-option {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-option:hover {
+            background: #f8f9fa;
+            transform: translateX(10px);
+        }
+        .game-option.correct {
+            background: #E8F5E9;
+            border-color: #4CAF50;
+        }
+        .game-option.wrong {
+            background: #FFEBEE;
+            border-color: #F44336;
+        }
+        .timer-bar {
+            height: 5px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        .timer-progress {
+            height: 100%;
+            background: #4CAF50;
+            width: 100%;
+            transition: width linear;
+        }
+        .points-animation {
+            position: fixed;
+            color: #4CAF50;
+            font-weight: bold;
+            pointer-events: none;
+            animation: pointsFloat 1s ease-out forwards;
+        }
+        .xp-bar {
+            width: 150px;
+            height: 8px;
+            background: #2c3e50;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .xp-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #f1c40f, #f39c12);
+            transition: width 0.3s ease;
+        }
+        .achievement {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1100;
+        }
+        .achievement.show {
+            transform: translateX(0);
+        }
+        .achievement-icon {
+            font-size: 2rem;
+        }
+        .achievement-details {
+            flex: 1;
+        }
+        .achievement-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        .achievement-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .level-rewards {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        @keyframes starPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        @keyframes pointsFloat {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        .report-container {
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .stat-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            display: block;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .report-content {
+            margin: 2rem 0;
+        }
+        .ai-insights {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            margin: 1rem 0;
+        }
+        .achievements-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 20px;
+        }
+        .recommendations {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-left: 4px solid #2196F3;
+            margin: 1rem 0;
+        }
+        .report-close-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 2rem;
+        }
+        .report-close-btn:hover {
+            background: #45a049;
+        }
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        .report-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .download-btn, .play-audio-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .download-btn {
+            background: #2196F3;
+            color: white;
+        }
+        .play-audio-btn {
+            background: #9C27B0;
+            color: white;
+        }
+        .download-btn:hover {
+            background: #1976D2;
+        }
+        .play-audio-btn:hover {
+            background: #7B1FA2;
+        }
+        .play-audio-btn.playing {
+            background: #FF5722;
+        }
+        .audio-progress {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .audio-progress.active {
+            display: block;
+        }
+        .audio-progress-bar {
+            height: 100%;
+            background: #9C27B0;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .success-message {
+            text-align: center;
+            padding: 2rem;
+            background: #E8F5E9;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        .success-message p {
+            color: #2E7D32;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .audio-option {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Health Tycoon</h1>
+        <nav>
+            <button onclick="navigateTo('home.html')">Back to Home</button>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <div class="game-header">
+            <div class="points-display">
+                <div>
+                    <span>🏆</span>
+                    <span id="totalPoints">0</span> Points
+                </div>
+                <div style="font-size: 0.9rem;">Level <span id="playerLevel">1</span></div>
+                <div class="xp-bar">
+                    <div class="xp-progress" id="xpProgress"></div>
+                </div>
+            </div>
+            <div class="health-bar">
+                <div class="health-progress" id="playerHealth" style="width: 100%;"></div>
+            </div>
+            <div class="power-ups">
+                <div class="power-up" onclick="usePowerUp('hint')" title="Hint">💡</div>
+                <div class="power-up" onclick="usePowerUp('time')" title="Extra Time">⏰</div>
+                <div class="power-up" onclick="usePowerUp('shield')" title="Shield">🛡️</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="overallProgress"></div>
+        </div>
+
+        <div class="levels-grid" id="levelsGrid">
+            <!-- Levels will be generated here -->
+        </div>
+
+        <div class="report-section" id="reportSection">
+            <h2>Health Progress Report</h2>
+            <div id="reportContent"></div>
+        </div>
+    </main>
+
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2>Welcome to Health Education!</h2>
+            <p id="tutorialText"></p>
+            <button onclick="closeTutorial()">Got it!</button>
+        </div>
+    </div>
+
+    <!-- Challenge Overlay -->
+    <div class="tutorial-overlay" id="challengeOverlay">
+        <div class="tutorial-content">
+            <div class="timer-bar">
+                <div class="timer-progress" id="challengeTimer"></div>
+            </div>
+            <h2 id="challengeTitle">Challenge</h2>
+            <div id="challengeContent"></div>
+            <div id="challengeOptions"></div>
+            <div id="challengeFeedback" style="margin: 1rem 0; color: #4CAF50;"></div>
+            <button id="challengeButton" onclick="submitChallenge()">Submit Answer</button>
+        </div>
+    </div>
+
+    <!-- Floating Chatbot Button -->
+    <div class="floating-chat" onclick="openChat()">
+        <span>💬</span>
+    </div>
+
+    <script>
+        const levels = [
+            { number: 1, icon: '🎓', title: 'Basics of Nutrition', type: 'tutorial' },
+            { number: 2, icon: '📝', title: 'Understanding Calories', type: 'tutorial' },
+            { number: 3, icon: '🥗', title: 'Balanced Diet', type: 'challenge' },
+            { number: 4, icon: '💪', title: 'Exercise Fundamentals', type: 'challenge' },
+            { number: 5, icon: '📊', title: 'Progress Check', type: 'report' },
+            { number: 6, icon: '🧠', title: 'Mental Wellness', type: 'challenge' },
+            { number: 7, icon: '😴', title: 'Sleep Hygiene', type: 'challenge' },
+            { number: 8, icon: '🏃', title: 'Active Lifestyle', type: 'challenge' },
+            { number: 9, icon: '🥤', title: 'Hydration', type: 'challenge' },
+            { number: 10, icon: '🎯', title: 'Final Assessment', type: 'report' }
+        ];
+
+        let currentLevel = 1;
+        let completedLevels = [];
+        let playerPoints = 0;
+        let playerHealth = 100;
+        let powerUps = {
+            hint: 3,
+            time: 2,
+            shield: 1
+        };
+        let currentTimer = null;
+        let currentChallenge = null;
+        let playerXP = 0;
+        let playerLevel = 1;
+        const XP_PER_LEVEL = 1000;
+        
+        const achievements = [
+            { id: 'first_perfect', icon: '🎯', title: 'Perfect Score!', description: 'Get all answers correct in a challenge', xp: 200 },
+            { id: 'speed_demon', icon: '⚡', title: 'Speed Demon', description: 'Complete a challenge in under 30 seconds', xp: 150 },
+            { id: 'health_expert', icon: '👨‍⚕️', title: 'Health Expert', description: 'Complete all nutrition challenges', xp: 300 },
+            { id: 'streak_master', icon: '🔥', title: 'Streak Master', description: 'Complete 3 challenges in a row', xp: 250 },
+            { id: 'power_user', icon: '💪', title: 'Power User', description: 'Use all power-ups successfully', xp: 200 }
+        ];
+
+        let unlockedAchievements = new Set();
+        let challengeStreak = 0;
+
+        function initializeLevels() {
+            const grid = document.getElementById('levelsGrid');
+            grid.innerHTML = '';
+
+            levels.forEach(level => {
+                const card = document.createElement('div');
+                card.className = `level-card ${level.number > currentLevel ? 'locked' : ''} ${completedLevels.includes(level.number) ? 'completed' : ''}`;
+                
+                // Add stars based on performance
+                const stars = completedLevels.includes(level.number) ? 3 : 0;
+                
+                card.innerHTML = `
+                    <div class="level-icon">${level.icon}</div>
+                    <div class="level-number">Level ${level.number}</div>
+                    <div class="level-status">${level.title}</div>
+                    <div class="level-stars">
+                        ${Array(3).fill('⭐').map((star, idx) => 
+                            `<span class="star ${idx < stars ? 'earned' : ''}">${star}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                
+                // Only allow clicking if level is unlocked
+                if (level.number <= currentLevel) {
+                    card.onclick = () => startLevel(level);
+                }
+                
+                grid.appendChild(card);
+            });
+
+            // Update progress bar
+            const progress = (completedLevels.length / levels.length) * 100;
+            document.getElementById('overallProgress').style.width = `${progress}%`;
+            
+            // Update level display
+            document.getElementById('playerLevel').textContent = currentLevel;
+        }
+
+        function startLevel(level) {
+            if (level.number > currentLevel) {
+                showStatus('❌ Complete previous levels first!', true);
+                return;
+            }
+
+            if (level.type === 'tutorial') {
+                showTutorial(level);
+            } else if (level.type === 'report') {
+                generateReport(level);
+            } else {
+                startChallenge(level);
+            }
+        }
+
+        function showTutorial(level) {
+            const tutorials = {
+                1: `Welcome to Health Education! In this journey, you'll learn about nutrition, exercise, and wellness. 
+                    Let's start with the basics of nutrition:
+                    
+                    1. Macronutrients: Proteins, Carbohydrates, and Fats
+                    2. Micronutrients: Vitamins and Minerals
+                    3. The importance of balanced meals
+                    4. Understanding food groups
+                    
+                    Complete each level to unlock new challenges and track your learning progress!`,
+                2: `Let's understand calories! They are units of energy that your body needs.
+                    
+                    Key Points:
+                    - Daily calorie needs vary by age, gender, and activity level
+                    - The average adult needs 2000-2500 calories per day
+                    - Not all calories are equal - nutrition matters!
+                    - Balance your intake with activity for optimal health
+                    
+                    Ready to test your knowledge?`
+            };
+
+            document.getElementById('tutorialText').innerHTML = tutorials[level.number].replace(/\n/g, '<br>');
+            document.getElementById('tutorialOverlay').style.display = 'flex';
+        }
+
+        function closeTutorial() {
+            document.getElementById('tutorialOverlay').style.display = 'none';
+            completeLevel(currentLevel);
+        }
+
+        function startChallenge(level) {
+            const challenges = {
+                3: {
+                    title: "Balanced Diet Challenge",
+                    question: "Create a balanced meal by selecting the right combination of foods:",
+                    type: "multiple-choice",
+                    options: [
+                        "Pizza, Soda, and Fries",
+                        "Grilled Chicken, Brown Rice, and Steamed Vegetables",
+                        "Burger, Milkshake, and Onion Rings",
+                        "White Bread, Butter, and Jam"
+                    ],
+                    correct: 1,
+                    explanation: "A balanced meal should include lean protein (chicken), complex carbohydrates (brown rice), and vegetables for vitamins and fiber."
+                },
+                4: {
+                    title: "Exercise Fundamentals",
+                    question: "Match the exercise type with its primary benefit:",
+                    type: "matching",
+                    pairs: [
+                        ["Cardio", "Improves heart health and burns calories"],
+                        ["Strength Training", "Builds muscle and increases metabolism"],
+                        ["Flexibility", "Improves range of motion and prevents injury"],
+                        ["Balance", "Enhances coordination and prevents falls"]
+                    ]
+                },
+                6: {
+                    title: "Mental Wellness Check",
+                    type: "interactive",
+                    content: `
+                        <h3>Stress Management Techniques</h3>
+                        <p>Try this 1-minute breathing exercise:</p>
+                        <div id="breathingGuide" style="font-size: 1.5rem; margin: 1rem 0;"></div>
+                        <div id="breathingTimer" style="font-size: 2rem;"></div>
+                    `
+                },
+                7: {
+                    title: "Sleep Hygiene Quiz",
+                    type: "quiz",
+                    questions: [
+                        {
+                            question: "Which of these is NOT good sleep hygiene?",
+                            options: [
+                                "Having a consistent sleep schedule",
+                                "Using electronic devices in bed",
+                                "Making your bedroom dark and quiet",
+                                "Avoiding caffeine before bedtime"
+                            ],
+                            correct: 1
+                        }
+                    ]
+                },
+                8: {
+                    title: "Active Lifestyle Planning",
+                    type: "planning",
+                    task: "Create a daily activity schedule by dragging activities into time slots",
+                    activities: [
+                        "Morning Walk (20 mins)",
+                        "Desk Stretches (5 mins)",
+                        "Lunch Break Walk (10 mins)",
+                        "Evening Exercise (30 mins)"
+                    ]
+                },
+                9: {
+                    title: "Hydration Challenge",
+                    type: "calculator",
+                    task: "Calculate your daily water needs:",
+                    inputs: [
+                        { label: "Weight (kg)", id: "weight" },
+                        { label: "Exercise Duration (minutes)", id: "exercise" }
+                    ]
+                }
+            };
+
+            currentChallenge = {
+                ...challenges[level.number],
+                number: level.number  // Add the level number to the challenge
+            };
+            
+            if (!currentChallenge) {
+                showStatus("Challenge not available", true);
+                return;
+            }
+
+            document.getElementById('challengeTitle').textContent = currentChallenge.title;
+            const content = document.getElementById('challengeContent');
+            const options = document.getElementById('challengeOptions');
+            
+            switch(currentChallenge.type) {
+                case 'multiple-choice':
+                    content.innerHTML = `<p>${currentChallenge.question}</p>`;
+                    options.innerHTML = currentChallenge.options.map((opt, idx) => `
+                        <div class="game-option" data-correct="${idx === currentChallenge.correct}">
+                            ${opt}
+                        </div>
+                    `).join('');
+                    break;
+
+                case 'matching':
+                    content.innerHTML = `<p>Match the following:</p>`;
+                    options.innerHTML = currentChallenge.pairs.map((pair, idx) => `
+                        <div style="display: flex; justify-content: space-between; margin: 1rem 0;">
+                            <div>${pair[0]}</div>
+                            <select id="match${idx}">
+                                <option value="">Select...</option>
+                                ${currentChallenge.pairs.map((_, i) => 
+                                    `<option value="${i}">${currentChallenge.pairs[i][1]}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    `).join('');
+                    break;
+
+                case 'interactive':
+                    content.innerHTML = currentChallenge.content;
+                    if (level.number === 6) {
+                        startBreathingExercise();
+                    }
+                    break;
+
+                case 'calculator':
+                    content.innerHTML = `<p>${currentChallenge.task}</p>`;
+                    options.innerHTML = currentChallenge.inputs.map(input => `
+                        <div style="margin: 1rem 0;">
+                            <label for="${input.id}">${input.label}</label>
+                            <input type="number" id="${input.id}" style="margin-left: 1rem;">
+                        </div>
+                    `).join('');
+                    break;
+            }
+
+            document.getElementById('challengeOverlay').style.display = 'flex';
+            document.getElementById('challengeFeedback').textContent = '';
+            document.getElementById('challengeButton').textContent = 'Submit Answer';
+            document.getElementById('challengeButton').onclick = () => submitChallenge();
+
+            // Add timer for challenges
+            startTimer(60); // 60 seconds per challenge
+        }
+
+        function submitChallenge() {
+            const feedback = document.getElementById('challengeFeedback');
+            let isCorrect = false;
+
+            switch(currentChallenge.type) {
+                case 'multiple-choice':
+                    const selected = document.querySelector('.game-option.selected');
+                    if (selected && selected.dataset.correct === 'true') {
+                        isCorrect = true;
+                        feedback.textContent = currentChallenge.explanation;
+                    } else {
+                        feedback.textContent = "Try again! Think about what makes a balanced meal.";
+                    }
+                    break;
+
+                case 'matching':
+                    const allMatched = Array.from({ length: currentChallenge.pairs.length }, (_, i) => {
+                        const select = document.getElementById(`match${i}`);
+                        return select.value === i.toString();
+                    }).every(Boolean);
+                    
+                    if (allMatched) {
+                        isCorrect = true;
+                        feedback.textContent = "Perfect! You understand different types of exercise!";
+                    } else {
+                        feedback.textContent = "Some matches are incorrect. Try again!";
+                    }
+                    break;
+
+                case 'calculator':
+                    const weight = parseFloat(document.getElementById('weight').value);
+                    const exercise = parseFloat(document.getElementById('exercise').value);
+                    
+                    if (weight && exercise) {
+                        const waterNeeds = (weight * 0.033 + exercise * 0.0125).toFixed(1);
+                        feedback.textContent = `Based on your input, you should drink approximately ${waterNeeds} liters of water per day!`;
+                        isCorrect = true;
+                    } else {
+                        feedback.textContent = "Please enter valid numbers.";
+                    }
+                    break;
+
+                case 'interactive':
+                    isCorrect = true;
+                    feedback.textContent = "Great job completing the exercise!";
+                    break;
+            }
+
+            if (isCorrect) {
+                document.getElementById('challengeButton').textContent = "Continue";
+                document.getElementById('challengeButton').onclick = () => {
+                    document.getElementById('challengeOverlay').style.display = 'none';
+                    completeLevel(currentChallenge.number);
+                };
+            }
+        }
+
+        // Add click handlers for multiple choice options
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('game-option')) {
+                // Remove selected class from all options
+                document.querySelectorAll('.game-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                // Add selected class to clicked option
+                e.target.classList.add('selected');
+            }
+        });
+
+        function startBreathingExercise() {
+            let seconds = 60;
+            const timer = document.getElementById('breathingTimer');
+            const guide = document.getElementById('breathingGuide');
+            let phase = 0;
+            
+            const interval = setInterval(() => {
+                seconds--;
+                timer.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    submitChallenge();
+                }
+                
+                phase = (phase + 1) % 4;
+                guide.textContent = ['Inhale...', 'Hold...', 'Exhale...', 'Hold...'][phase];
+            }, 1000);
+        }
+
+        async function generateReport(level) {
+            const reportContent = document.getElementById('reportContent');
+            reportContent.innerHTML = '<p>Generating your health report...</p>';
+
+            const progressData = {
+                level: level.number,
+                completedLevels: completedLevels,
+                points: playerPoints,
+                achievements: Array.from(unlockedAchievements),
+                playerLevel: playerLevel,
+                playerXP: playerXP,
+                challengeStreak: challengeStreak,
+                healthStatus: playerHealth,
+                timestamp: new Date().toLocaleString()
+            };
+
+            try {
+                // First, get the report data
+                const reportResponse = await fetch('/api/generate-health-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(progressData)
+                });
+
+                if (!reportResponse.ok) {
+                    throw new Error('Failed to generate report');
+                }
+
+                const reportData = await reportResponse.json();
+
+                // Store report data for audio playback
+                window.currentReportData = {
+                    level: level.number,
+                    progress: Math.round((completedLevels.length / levels.length) * 100),
+                    playerLevel,
+                    points: playerPoints,
+                    analysis: reportData.analysis,
+                    achievements: Array.from(unlockedAchievements).map(id => achievements.find(a => a.id === id)),
+                    recommendations: reportData.recommendations
+                };
+
+                // Directly generate and download PDF
+                const pdfResponse = await fetch('/api/generate-pdf-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ...window.currentReportData,
+                        timestamp: new Date().toLocaleString()
+                    })
+                });
+
+                if (!pdfResponse.ok) {
+                    throw new Error('Failed to generate PDF');
+                }
+
+                const blob = await pdfResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `health_report_level_${level.number}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                // Show a success message with audio option
+                reportContent.innerHTML = `
+                    <div class="success-message">
+                        <p>✅ Report has been downloaded successfully!</p>
+                        <div class="audio-option">
+                            <button onclick="toggleAudioExplanation()" class="play-audio-btn" id="playAudioBtn">
+                                <span>🔊</span> Listen to Report
+                            </button>
+                            <div class="audio-progress" id="audioProgress">
+                                <div class="audio-progress-bar" id="audioProgressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add success message styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    .success-message {
+                        text-align: center;
+                        padding: 2rem;
+                        background: #E8F5E9;
+                        border-radius: 10px;
+                        margin: 1rem 0;
+                    }
+                    .success-message p {
+                        color: #2E7D32;
+                        font-size: 1.2rem;
+                        margin-bottom: 1rem;
+                    }
+                    .audio-option {
+                        margin-top: 1rem;
+                    }
+                `;
+                document.head.appendChild(style);
+
+                // Complete the level
+                completeLevel(level.number);
+
+            } catch (error) {
+                console.error('Error generating report:', error);
+                reportContent.innerHTML = `
+                    <div class="error-message">
+                        <p>❌ Unable to generate report at this time.</p>
+                        <p>Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        let audioPlaying = false;
+        let audioContext = null;
+        let currentAudio = null;
+
+        async function toggleAudioExplanation() {
+            const playButton = document.getElementById('playAudioBtn');
+            const progressBar = document.getElementById('audioProgress');
+            const progressBarFill = document.getElementById('audioProgressBar');
+
+            if (audioPlaying) {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                audioPlaying = false;
+                playButton.innerHTML = '<span>🔊</span> Play Audio';
+                playButton.classList.remove('playing');
+                progressBar.classList.remove('active');
+                return;
+            }
+
+            try {
+                playButton.innerHTML = '<span>⏳</span> Loading...';
+                
+                const response = await fetch('/api/generate-audio-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(window.currentReportData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate audio');
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                currentAudio = new Audio(audioUrl);
+                
+                currentAudio.addEventListener('play', () => {
+                    playButton.innerHTML = '<span>⏸️</span> Pause';
+                    playButton.classList.add('playing');
+                    progressBar.classList.add('active');
+                });
+
+                currentAudio.addEventListener('timeupdate', () => {
+                    const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                    progressBarFill.style.width = `${progress}%`;
+                });
+
+                currentAudio.addEventListener('ended', () => {
+                    playButton.innerHTML = '<span>🔊</span> Play Audio';
+                    playButton.classList.remove('playing');
+                    progressBar.classList.remove('active');
+                    audioPlaying = false;
+                });
+
+                await currentAudio.play();
+                audioPlaying = true;
+
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                alert('Failed to play audio explanation. Please try again.');
+                playButton.innerHTML = '<span>🔊</span> Play Audio';
+            }
+        }
+
+        function closeReport() {
+            document.getElementById('reportSection').style.display = 'none';
+        }
+
+        function completeLevel(levelNumber) {
+            console.log('Completing level:', levelNumber); // Debug log
+            
+            if (!completedLevels.includes(levelNumber)) {
+                completedLevels.push(levelNumber);
+                
+                // Update current level if this was the current level
+                if (levelNumber === currentLevel) {
+                    currentLevel++;
+                    console.log('New current level:', currentLevel); // Debug log
+                    
+                    // Add points and XP for completing the level
+                    const levelPoints = 100 + (levelNumber * 50);
+                    updatePoints(levelPoints);
+                    updateXP(levelPoints);
+                    
+                    // Show level completion message
+                    showAchievement({
+                        icon: '🎉',
+                        title: 'Level Complete!',
+                        description: `Congratulations! You've completed level ${levelNumber}!`
+                    });
+                }
+                
+                // Update the UI
+                initializeLevels();
+                updateProgress();
+                
+                // Check for achievements
+                checkAchievements({
+                    levelCompleted: levelNumber,
+                    allCorrect: true,
+                    time: 60
+                });
+            }
+        }
+
+        function updateProgress() {
+            const progress = (completedLevels.length / levels.length) * 100;
+            document.getElementById('overallProgress').style.width = `${progress}%`;
+        }
+
+        function openChat() {
+            const chatWindow = window.open('chat.html', 'ChatWindow', 'width=400,height=600,right=20,bottom=80');
+        }
+
+        function updatePoints(points) {
+            playerPoints += points;
+            document.getElementById('totalPoints').textContent = playerPoints;
+            
+            // Animate points gained
+            const pointsAnim = document.createElement('div');
+            pointsAnim.className = 'points-animation';
+            pointsAnim.textContent = `+${points}`;
+            pointsAnim.style.left = `${Math.random() * 80 + 10}%`;
+            pointsAnim.style.top = `${Math.random() * 50 + 25}%`;
+            document.body.appendChild(pointsAnim);
+            setTimeout(() => pointsAnim.remove(), 1000);
+        }
+
+        function updateHealth(change) {
+            playerHealth = Math.max(0, Math.min(100, playerHealth + change));
+            document.getElementById('playerHealth').style.width = `${playerHealth}%`;
+            
+            if (playerHealth <= 0) {
+                alert('Game Over! Try again from your last checkpoint.');
+                playerHealth = 100;
+                updateHealth(0);
+            }
+        }
+
+        function usePowerUp(type) {
+            if (powerUps[type] > 0) {
+                powerUps[type]--;
+                switch(type) {
+                    case 'hint':
+                        showHint();
+                        break;
+                    case 'time':
+                        addExtraTime();
+                        break;
+                    case 'shield':
+                        activateShield();
+                        break;
+                }
+                document.querySelector(`.power-up[onclick*="${type}"]`).classList.add('active');
+                setTimeout(() => {
+                    document.querySelector(`.power-up[onclick*="${type}"]`).classList.remove('active');
+                }, 1000);
+            }
+        }
+
+        function showHint() {
+            if (currentChallenge && currentChallenge.type === 'multiple-choice') {
+                const wrongOptions = document.querySelectorAll('.game-option:not(.correct)');
+                if (wrongOptions.length > 0) {
+                    const randomWrong = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+                    randomWrong.style.opacity = '0.5';
+                }
+            }
+        }
+
+        function addExtraTime() {
+            if (currentTimer) {
+                clearTimeout(currentTimer);
+                startTimer(30); // Add 30 seconds
+            }
+        }
+
+        function activateShield() {
+            playerHealth = Math.min(100, playerHealth + 50);
+            updateHealth(0);
+        }
+
+        function startTimer(seconds) {
+            const timerBar = document.getElementById('challengeTimer');
+            timerBar.style.transition = `width ${seconds}s linear`;
+            timerBar.style.width = '0%';
+            
+            currentTimer = setTimeout(() => {
+                if (!document.querySelector('.game-option.correct')) {
+                    updateHealth(-20);
+                    showFeedback("Time's up! Try again.", false);
+                }
+            }, seconds * 1000);
+        }
+
+        function showFeedback(message, isCorrect) {
+            const feedback = document.getElementById('challengeFeedback');
+            feedback.textContent = message;
+            feedback.style.color = isCorrect ? '#4CAF50' : '#F44336';
+            
+            if (isCorrect) {
+                const basePoints = 100;
+                const timeBonus = Math.max(0, 30 - challengeTimer) * 5;
+                const streakBonus = challengeStreak * 20;
+                const totalPoints = basePoints + timeBonus + streakBonus;
+                
+                updatePoints(totalPoints);
+                updateXP(totalPoints);
+                
+                const stars = document.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    setTimeout(() => {
+                        star.classList.add('earned');
+                    }, index * 300);
+                });
+                
+                checkAchievements({
+                    levelCompleted: currentChallenge.number,
+                    allCorrect: true,
+                    time: challengeTimer,
+                    isCorrect: true
+                });
+            } else {
+                updateHealth(-10);
+                challengeStreak = 0;
+            }
+        }
+
+        function checkAnswer(option) {
+            // Add game-specific answer checking logic here
+            return option.dataset.correct === 'true';
+        }
+
+        function updateXP(xp) {
+            playerXP += xp;
+            const currentLevel = Math.floor(playerXP / XP_PER_LEVEL) + 1;
+            
+            if (currentLevel > playerLevel) {
+                levelUp(currentLevel);
+            }
+            
+            const xpInCurrentLevel = playerXP % XP_PER_LEVEL;
+            const progressPercentage = (xpInCurrentLevel / XP_PER_LEVEL) * 100;
+            
+            document.getElementById('xpProgress').style.width = `${progressPercentage}%`;
+            document.getElementById('playerLevel').textContent = playerLevel;
+        }
+
+        function levelUp(newLevel) {
+            playerLevel = newLevel;
+            showAchievement({
+                icon: '⭐',
+                title: 'Level Up!',
+                description: `You've reached level ${newLevel}! New rewards unlocked!`
+            });
+            
+            // Unlock rewards based on level
+            const rewards = {
+                2: { powerUp: 'hint', amount: 2 },
+                3: { powerUp: 'time', amount: 2 },
+                4: { powerUp: 'shield', amount: 1 },
+                5: { bonus: 'healthBoost', amount: 50 }
+            };
+            
+            if (rewards[newLevel]) {
+                const reward = rewards[newLevel];
+                if (reward.powerUp) {
+                    powerUps[reward.powerUp] += reward.amount;
+                } else if (reward.bonus === 'healthBoost') {
+                    updateHealth(reward.amount);
+                }
+            }
+        }
+
+        function showAchievement(achievement) {
+            const achievementDiv = document.createElement('div');
+            achievementDiv.className = 'achievement';
+            achievementDiv.innerHTML = `
+                <div class="achievement-icon">${achievement.icon}</div>
+                <div class="achievement-details">
+                    <div class="achievement-title">${achievement.title}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(achievementDiv);
+            setTimeout(() => achievementDiv.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                achievementDiv.classList.remove('show');
+                setTimeout(() => achievementDiv.remove(), 3000);
+            }, 3000);
+        }
+
+        function checkAchievements(challengeResult) {
+            if (challengeResult.allCorrect && !unlockedAchievements.has('first_perfect')) {
+                unlockAchievement('first_perfect');
+            }
+            
+            if (challengeResult.time < 30 && !unlockedAchievements.has('speed_demon')) {
+                unlockAchievement('speed_demon');
+            }
+            
+            challengeStreak = challengeResult.isCorrect ? challengeStreak + 1 : 0;
+            if (challengeStreak >= 3 && !unlockedAchievements.has('streak_master')) {
+                unlockAchievement('streak_master');
+            }
+        }
+
+        function unlockAchievement(achievementId) {
+            if (unlockedAchievements.has(achievementId)) return;
+            
+            const achievement = achievements.find(a => a.id === achievementId);
+            if (achievement) {
+                unlockedAchievements.add(achievementId);
+                showAchievement(achievement);
+                updateXP(achievement.xp);
+                updatePoints(achievement.xp);
+            }
+        }
+
+        // Initialize the game
+        initializeLevels();
+        updateHealth(0);
+        updateXP(0);
+    </script>
+</body>
+</html> 

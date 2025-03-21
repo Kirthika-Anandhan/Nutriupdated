@@ -1,0 +1,259 @@
+:root {
+    --gradient-primary: linear-gradient(135deg, #184e68 0%, #57ca85 100%);
+    --gradient-secondary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+    --gradient-steps: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+    --gradient-hydration: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
+    --gradient-sleep: linear-gradient(135deg, #614385 0%, #516395 100%);
+    --gradient-calories: linear-gradient(135deg, #FF8008 0%, #FFC837 100%);
+    --gradient-workout: linear-gradient(135deg, #02AAB0 0%, #00CDAC 100%);
+    --gradient-meditation: linear-gradient(135deg, #DA22FF 0%, #9733EE 100%);
+    --gradient-button: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --gradient-hover: linear-gradient(135deg, #16222a 0%, #3a6073 100%);
+    --shadow-soft: 0 8px 30px rgba(0,0,0,0.12);
+    --shadow-strong: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+/* General Page Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--gradient-primary);
+    min-height: 100vh;
+    color: #333;
+}
+
+/* Header */
+header {
+    background: var(--gradient-secondary);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    z-index: 0;
+}
+
+header h1 {
+    position: relative;
+    z-index: 1;
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    letter-spacing: 1px;
+}
+
+nav button {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+nav button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Challenge Container */
+.challenge-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.challenge-container:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-strong);
+}
+
+/* Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress {
+    height: 100%;
+    background: var(--gradient-secondary);
+    transition: width 0.5s ease-in-out;
+}
+
+/* Stat Cards */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-strong);
+}
+
+.stat-card h3 {
+    color: #2c5364;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.stat-card p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Input Groups */
+.input-group {
+    margin: 1.5rem 0;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="time"],
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(33, 147, 176, 0.2);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #2193b0;
+    box-shadow: 0 0 0 3px rgba(33, 147, 176, 0.1);
+}
+
+/* Buttons */
+button {
+    background: var(--gradient-button);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+button:hover {
+    background: var(--gradient-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-strong);
+}
+
+/* Achievements List */
+.achievements-list {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: var(--shadow-soft);
+}
+
+.achievements-list h3 {
+    color: #2c5364;
+    margin: 0 0 1rem 0;
+}
+
+.achievements-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.achievements-list li {
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.achievements-list li:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Page-specific gradients */
+body.steps-page { background: var(--gradient-steps); }
+body.hydration-page { background: var(--gradient-hydration); }
+body.sleep-page { background: var(--gradient-sleep); }
+body.calories-page { background: var(--gradient-calories); }
+body.workout-page { background: var(--gradient-workout); }
+body.meditation-page { background: var(--gradient-meditation); }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .challenge-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Glass Morphism */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}

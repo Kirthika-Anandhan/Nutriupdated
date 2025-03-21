@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fef9f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        /* Logo Styling */
+        .logo {
+            width: 120px;
+            margin-bottom: 10px;
+        }
+
+        /* Title */
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        /* Email Styling */
+        .email {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* OTP Input Fields */
+        .otp-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .otp-container input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        /* Verify OTP Button */
+        .btn {
+            width: 100%;
+            background-color: #c93f5d;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #a32f4a;
+        }
+
+        /* Timer */
+        .timer {
+            font-size: 14px;
+            color: #777;
+            margin-top: 10px;
+        }
+
+        /* Back to Forgot Password */
+        .back {
+            display: block;
+            margin-top: 10px;
+            color: #c93f5d;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+        
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="logo.jpg" alt="NutriFlow Logo" width="300" height="125" class="logo">  <!-- Replace with your actual logo file -->
+        <h2>Reset Your Password</h2>
+        <p>Enter the OTP sent to <span class="email">your-email@gmail.com</span></p>
+        
+        <!-- OTP Input Fields -->
+        <div class="otp-container">
+            <input type="text" maxlength="1">
+            <input type="text" maxlength="1">
+            <input type="text" maxlength="1">
+            <input type="text" maxlength="1">
+            <input type="text" maxlength="1">
+            <input type="text" maxlength="1">
+        </div>
+
+        <button class="btn">Verify OTP</button>
+
+        <p class="timer">Time remaining: <span id="countdown">119s</span></p>
+        <a href="forgot.html" class="back">Back to Forgot Password</a>
+    </div>
+
+    <script>
+        // Countdown Timer
+        let timeLeft = 119;
+        const timerElement = document.getElementById('countdown');
+
+        function updateTimer() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                timerElement.textContent = timeLeft + "s";
+            } else {
+                timerElement.textContent = "Time expired!";
+            }
+        }
+
+        setInterval(updateTimer, 1000);
+    </script>
+
+</body>
+</html>

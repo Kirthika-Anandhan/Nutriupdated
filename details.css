@@ -1,0 +1,171 @@
+:root {
+    --gradient-primary: linear-gradient(135deg, #184e68 0%, #57ca85 100%);
+    --gradient-secondary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+    --gradient-accent: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    --gradient-button: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --gradient-hover: linear-gradient(135deg, #16222a 0%, #3a6073 100%);
+    --shadow-soft: 0 8px 30px rgba(0,0,0,0.12);
+    --shadow-strong: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--gradient-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-soft);
+    border-radius: 20px;
+    text-align: left;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-strong);
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 2rem;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+h2 {
+    text-align: center;
+    color: #184e68;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+label {
+    font-weight: 500;
+    color: #2c5364;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(33, 147, 176, 0.2);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #2193b0;
+    box-shadow: 0 0 0 3px rgba(33, 147, 176, 0.1);
+    background: white;
+}
+
+button {
+    margin-top: 2rem;
+    background: var(--gradient-button);
+    color: white;
+    padding: 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    background: var(--gradient-hover);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-soft);
+}
+
+.input-group label {
+    flex: 1;
+    margin: 0;
+}
+
+.input-group input {
+    flex: 2;
+}
+
+select {
+    background-image: linear-gradient(45deg, transparent 50%, #2193b0 50%),
+                      linear-gradient(135deg, #2193b0 50%, transparent 50%);
+    background-position: calc(100% - 20px) calc(1em + 2px),
+                         calc(100% - 15px) calc(1em + 2px);
+    background-size: 5px 5px,
+                    5px 5px;
+    background-repeat: no-repeat;
+    appearance: none;
+}
+
+/* Add animation for form elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+form > * {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+form > *:nth-child(1) { animation-delay: 0.1s; }
+form > *:nth-child(2) { animation-delay: 0.2s; }
+form > *:nth-child(3) { animation-delay: 0.3s; }
+form > *:nth-child(4) { animation-delay: 0.4s; }
+form > *:nth-child(5) { animation-delay: 0.5s; }
+form > *:nth-child(6) { animation-delay: 0.6s; }
+form > *:nth-child(7) { animation-delay: 0.7s; }
+form > *:nth-child(8) { animation-delay: 0.8s; }
+
+/* Glass morphism effect for form elements */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}

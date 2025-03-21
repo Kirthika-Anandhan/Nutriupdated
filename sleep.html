@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Tracker</title>
+    <link rel="stylesheet" href="game.css">
+    <style>
+        .challenge-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .sleep-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .input-group {
+            margin: 1rem 0;
+        }
+        .quality-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .quality-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .quality-btn.poor { background: #ffcdd2; }
+        .quality-btn.fair { background: #fff9c4; }
+        .quality-btn.good { background: #c8e6c9; }
+        .quality-btn.selected {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .sleep-chart {
+            height: 200px;
+            margin: 2rem 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="sleep-page">
+    <header>
+        <h1>Sleep Tracker</h1>
+        <nav>
+            <button onclick="navigateTo('game.html')">Back to Challenges</button>
+        </nav>
+    </header>
+
+    <main class="challenge-container">
+        <div class="sleep-input">
+            <div class="input-group">
+                <h3>Sleep Time</h3>
+                <input type="time" id="sleepTime" value="22:00">
+            </div>
+            <div class="input-group">
+                <h3>Wake Time</h3>
+                <input type="time" id="wakeTime" value="06:00">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <h3>Sleep Quality</h3>
+            <div class="quality-buttons">
+                <button class="quality-btn poor" onclick="selectQuality('poor')">Poor</button>
+                <button class="quality-btn fair" onclick="selectQuality('fair')">Fair</button>
+                <button class="quality-btn good" onclick="selectQuality('good')">Good</button>
+            </div>
+        </div>
+
+        <button onclick="logSleep()" style="width: 100%; margin: 1rem 0;">Log Sleep</button>
+
+        <div class="sleep-chart">
+            <h3>Weekly Sleep Pattern</h3>
+            <div id="weeklyChart">
+                <!-- Chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Average Hours</h3>
+                <p id="avgHours">0 hrs</p>
+            </div>
+            <div class="stat-card">
+                <h3>Sleep Streak</h3>
+                <p id="streak">0 days</p>
+            </div>
+            <div class="stat-card">
+                <h3>Achievements</h3>
+                <p id="achievements">0</p>
+            </div>
+        </div>
+
+        <div class="achievements-list">
+            <h3>Recent Achievements</h3>
+            <ul id="achievementsList">
+                <!-- Achievements will be added here dynamically -->
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        let selectedQuality = null;
+        let streak = 0;
+        let achievementsCount = 0;
+        let sleepLogs = [];
+
+        function selectQuality(quality) {
+            selectedQuality = quality;
+            document.querySelectorAll('.quality-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`.quality-btn.${quality}`).classList.add('selected');
+        }
+
+        function calculateSleepHours(sleepTime, wakeTime) {
+            const sleep = new Date(`2000/01/01 ${sleepTime}`);
+            const wake = new Date(`2000/01/01 ${wakeTime}`);
+            if (wake < sleep) wake.setDate(wake.getDate() + 1);
+            return (wake - sleep) / (1000 * 60 * 60);
+        }
+
+        function logSleep() {
+            if (!selectedQuality) {
+                alert('Please select sleep quality');
+                return;
+            }
+
+            const sleepTime = document.getElementById('sleepTime').value;
+            const wakeTime = document.getElementById('wakeTime').value;
+            const hours = calculateSleepHours(sleepTime, wakeTime);
+
+            sleepLogs.push({
+                date: new Date(),
+                hours: hours,
+                quality: selectedQuality
+            });
+
+            updateStats();
+            checkAchievements(hours);
+        }
+
+        function updateStats() {
+            if (sleepLogs.length === 0) return;
+
+            const avgHours = sleepLogs.reduce((sum, log) => sum + log.hours, 0) / sleepLogs.length;
+            document.getElementById('avgHours').textContent = avgHours.toFixed(1) + ' hrs';
+            document.getElementById('streak').textContent = streak + ' days';
+            document.getElementById('achievements').textContent = achievementsCount;
+        }
+
+        function checkAchievements(hours) {
+            const achievements = [
+                { condition: hours >= 8, name: "Perfect Sleep" },
+                { condition: hours >= 7, name: "Good Sleep" },
+                { condition: sleepLogs.length >= 7, name: "Week Warrior" },
+                { condition: streak >= 3, name: "Consistent Sleeper" }
+            ];
+
+            achievements.forEach(achievement => {
+                if (achievement.condition) {
+                    addAchievement(achievement.name);
+                }
+            });
+        }
+
+        function addAchievement(name) {
+            const list = document.getElementById('achievementsList');
+            const existingAchievements = list.innerText;
+            
+            if (!existingAchievements.includes(name)) {
+                achievementsCount++;
+                const li = document.createElement('li');
+                li.textContent = `😴 ${name}`;
+                list.insertBefore(li, list.firstChild);
+                updateStats();
+            }
+        }
+
+        // Initialize display
+        updateStats();
+    </script>
+</body>
+</html> 
